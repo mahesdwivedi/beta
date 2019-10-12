@@ -20,7 +20,6 @@ passport.deserializeUser((id, done) => {
     done(null, user);
   });
 });
-
 // Implementing the passport github strategy
 passport.use(
   new FitBitStrategy(
@@ -28,13 +27,10 @@ passport.use(
       clientID: "22B645",
       clientSecret: "0fe01d68528bad127ca44c81eb28480c",
       callbackURL: "http://localhost:3000/auth/fitbit/callback",
-      passReqToCallBack: true
     },
-    (req, accessToken, refreshToken, profile, done) => {
+    (accessToken, refreshToken, profile, done) => {
       // Callback method triggered upon signing in.
-      console.log(refreshToken)
-        
-    //   req.header.Authorization = `Bearer ${accessToken}`
+     console.log(profile)
       User.findOne({ fitbitId: profile.id }).then(currentUser => {
         if (currentUser) {
           // already have this user
@@ -45,6 +41,7 @@ passport.use(
             fitbitId: profile.id,
             username: profile.username,
             name: profile.displayName,
+            auth: accessToken
           })
             .save()
             .then(newUser => {
@@ -55,3 +52,7 @@ passport.use(
     }
   )
 );
+
+module.exports = {
+  
+}

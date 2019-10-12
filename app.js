@@ -6,11 +6,12 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var passport = require('passport');
 var indexRouter = require('./routes/index');
+var algoRouter = require('./routes/algo');
 var usersRouter = require('./routes/users');
 const passportSetup = require('./config/passport-setup');
 var authRouter = require("./routes/auth-routes") 
 var app = express();
-
+var token = require("./config/passport-setup")
 //db connection
 var mongoose = require('mongoose');
 var mongoDB = 'mongodb://127.0.0.1:27017/notice';
@@ -21,7 +22,8 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set('view engine', 'ejs');
+
 //passport intialise
 app.use(passport.initialize());
 app.use(passport.session());
@@ -36,9 +38,16 @@ app.use(
     keys: ["qwefgfds"]
   })
 );
+// app.use(function (req, res, next) {
+//   console.log(token.token)
+//   console.log("---------------")
+//   req.headers.authorization = token.token
+//   next()
+// })
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/auth', authRouter);
+app.use('/algo', algoRouter);
 
 
 // catch 404 and forward to error handler

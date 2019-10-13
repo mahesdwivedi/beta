@@ -1,18 +1,11 @@
 var express = require('express');
 var router = express.Router();
 const calorieData = require('../models/calorieData')
-var axios = require('axios')
-
-var avgCalBurnt,calorieIntake,foodValue;
+var fs = require("fs")
+var axios = require("axios")
 
 router.post('/', function(req, res, next) {
-    calorieIntake=req.body.calorieIntake;
-    activityFactor=req.body.activityFactor;
-    
-    let newCalorieData = new calorieData(req.body);
-    newCalorieData.save()
-    .then(res.render('camera'))
-    .catch((err) => console.log(err))
+    res.render('camera');
     });
   router.get('/', function(req, res, next) { 
     res.render('form');
@@ -21,28 +14,31 @@ router.post('/', function(req, res, next) {
 
 function bmiCalculator(height,weight){
     let bmi;
-    bmi=weight/(height*height);
+    bmi=weight*10000/(height*height);
     return bmi;
 }
 
-function bmiCalculator(height,weight,age,activityFactor,sex){
+function bmrCalculator(height,weight,age,activityFactor,sex){
     let bmr;
-    if (sex=='male'){
+    if (sex=='MALE'){
         bmr=[(10*weight)+(6.25*height)-(5*age)-5]*activityFactor;
     }
     else{
         bmr=[(10*weight)+(6.25*height)-(5*age)-161]*activityFactor;
     }
-    return bmi;
+    return bmr;
 }
 
-function choice(bmr,avgCalBurnt,calorieIntake,foodValue,suggestion){
+function choice(avgCalBurnt,calorieIntake,foodValue,age,suggestion,height,weight,sex,activityFactor){
+    bmr=bmrCalculator(height,weight,age,activityFactor,sex);
     bmiValue=bmiCalculator(height,weight);
+    console.log(bmr+"bmr"+bmiValue+"bmi");
     if(suggestion==1){
         if((bmiValue)<18.25){
             let suggestedWeight;
-            suggestedWeight=18.25*(height*height);
-            if (sex=='male'){
+            suggestedWeight=18.25*(height*height)/10000;
+            console.log(suggestedWeight);
+            if (sex=='MALE'){
                 newBmr=[(10*suggestedWeight)+(6.25*height)-(5*age)-5]*activityFactor;
             }
             else{
@@ -51,8 +47,9 @@ function choice(bmr,avgCalBurnt,calorieIntake,foodValue,suggestion){
         }
         else if(bmiValue>25){
             let suggestedWeight;
-            suggestedWeight=18.25*(height*height);
-            if (sex=='male'){
+            suggestedWeight=25*(height*height)/10000;
+            console.log(suggestedWeight);
+            if (sex=='MALE'){
                 newBmr=[(10*suggestedWeight)+(6.25*height)-(5*age)-5]*activityFactor;
             }
             else{
@@ -63,26 +60,100 @@ function choice(bmr,avgCalBurnt,calorieIntake,foodValue,suggestion){
     }
     else{
         newBmr=bmr;
+        console.log(newBmr);
     }
     let overallCalorie= calorieIntake-avgCalBurnt+foodValue;
-    if(bmr>overallCalorie){
+    if(bmiValue<18.25){
+    if(suggestion==0){
+        return 0;
+    }
+    else if(newBmr>overallCalorie){
+        console.log("nbmr");
+        console.log(newBmr);
+        console.log(overallCalorie);
+        return 1;
+    }
+    else{
+        return 0;
+    }}
+    if(bmiValue>25){
+        console.log("nbmr");
+        console.log(newBmr);
+        console.log(overallCalorie);
+        if(suggestion==0){
+            return 1;
+        }
+    else if(newBmr>overallCalorie){
+        
         return 0;
     }
     else{
         return 1;
-    }
+    }}
+
     
 }
 
 router.post("/camera", (req, res, next) => {
-    let activityFactor=1.55;
-    let calorieIntake=1000;
     axios({
-        method: 'get',
-        url: "https://api.fitbit.com/1/user/6PSSYP/activities/tracker/calories/date/2019-8-12/7d.json",
-        headers: {authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMkI2NDUiLCJzdWIiOiI2UFNTWVAiLCJpc3MiOiJGaXRiaXQiLCJ0eXAiOiJhY2Nlc3NfdG9rZW4iLCJzY29wZXMiOiJ3aHIgd3BybyB3YWN0IHdsb2MiLCJleHAiOjE1NzA5MzI5MjMsImlhdCI6MTU3MDkwNDEyM30.Wut1GrUK7JmyGyYtmeFC5orPyfBnhcyEcGENOzi7cdE'}
-    }).then(res => console.log(res.data)).catch(err => console.log(err)) 
+        url: "http://api.foodai.org/v1/classify?image_url=https://currypoint2go.com/wp-content/uploads/2016/01/tava_roti.jpg&num_tag=5&api_key=51ef41867f59fbf727f665a89cdc284d09c9b4e8"
+    }).then(res => {
+        console.log(res)
     })
+    var userProfileData = JSON.parse(fs.readFileSync('userProfile.json', 'utf8'));
+    let height = userProfileData.user.height;
+    console.log(height)
+    let weight=1;
+    let bmi=bmiCalculator(height,weight);
+   
+    if(bmi<18.25){
+        res.redirect('/algo/underweight');
+    }
+    else if(bmi>25){
+        res.redirect('/algo/overweight');
+    }
+    else{
+        res.redirect('/algo/normal');
+    }
+   
+})
+
+router.get('/underweight', function(req, res, next) {
+    res.render("underweight");
+  });
+
+  router.get('/overweight', function(req, res, next) {
+    res.render("overweight");
+  });
+
+  router.get('/normal', function(req, res, next) {
+    res.render("normal");
+  });
+
+  router.post('/suggestionHandler', function(req, res, next) {
+    var userProfileData = JSON.parse(fs.readFileSync('userProfile.json', 'utf8'));
+    let suggest=req.body.suggestion;
+    let calorieIntake=1000;
+    let height=userProfileData.user.height;
+    let weight=1;
+    let sex= userProfileData.user.gender;
+    let calorieBurnt= 230;
+    let activityFactor1=1.33;
+    let foodValue=250;
+    let age=userProfileData.user.age;
+    let answer= choice(calorieBurnt,calorieIntake,foodValue,age,suggest,height,weight,sex,activityFactor1);
+    res.render('result', {
+        "datas": answer
+      });
+  });
+  router.get('/result', function(req, res, next) {
+    res.render("result");
+  });
+
+  router.post('/normal', function(req, res, next) {
+    res.render("normal");
+  });
+
 
 router.get('/camera', function(req, res, next) {
     res.render("camera");

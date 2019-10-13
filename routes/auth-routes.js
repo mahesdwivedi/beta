@@ -21,7 +21,7 @@ router.get('/fitbit',
 // The redirect url
 router.get("/fitbit/success", (req, res) => {
     // For redirecting into the client app
-    res.redirect("http://localhost:3000/");
+    res.redirect("/algo");
   }
 );
 

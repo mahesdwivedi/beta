@@ -1,8 +1,12 @@
-<html>
-    <head></head>
-    <body>
-        <form action="/algo" method="POST">
-        <input type="text" name="calorieIntake">
+<%- include('navbar') %>
+
+<center><form class="form-inline" action="/algo" method="POST">
+    <div class="form-group">
+      <label for="email">Calorie intake</label>
+      <input type="text" class="form-control" id="email">
+    </div>
+    <br>
+    <div class="form-group">How much do you work?
         <select name="activityFactor">
             <option value="1.2">little</option>
             <option value="1.375">moderate</option>
@@ -10,6 +14,6 @@
             <option value="1.9">extreme</option>
           </select>
     <input type="submit">
-        </form>
-    </body>
-</html>
+    </div>
+    
+  </form> </center>

@@ -1,15 +1,36 @@
 <html>
-    <head></head>
-    <body>
-        <form action="/algo/camera" method="POST">
-        <input type="text" name="calorieIntake">
-        <select name="activityFactor">
-            <option value="1.2">little</option>
-            <option value="1.375">moderate</option>
-            <option value="1.55">hard</option>
-            <option value="1.9">extreme</option>
-          </select>
-    <input type="submit">
-        </form>
-    </body>
+  <header>
+    <script src="http://hongru.github.io/proj/canvas2image/canvas2image.js"></script>
+  </header>
+  <body>
+        <%- include('navbar') %>
+
+    <div align="center">
+      <video id="player" controls autoplay></video>
+      <form action="/algo/camera" method="POST">
+      <input id="capture" type="submit" value="capture"></input>
+      </form>
+      <canvas id="canvas" width="320" height="240"></canvas>
+    </div>
+  </body>
+  <script>
+    const player = document.getElementById("player");
+    const canvas = document.getElementById("canvas");
+    const context = canvas.getContext("2d");
+     const captureButton = document.getElementById("capture");
+
+    const constraints = {
+      video: true
+    };
+
+    captureButton.addEventListener("click", () => {
+      // Draw the video frame to the canvas.
+      context.drawImage(player, 0, 0, canvas.width, canvas.height);
+    });
+
+    // Attach the video stream to the video element and autoplay.
+    navigator.mediaDevices.getUserMedia(constraints).then(stream => {
+      player.srcObject = stream;
+    });
+  </script>
 </html>

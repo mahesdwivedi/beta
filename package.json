@@ -12,6 +12,7 @@
     "debug": "~2.6.9",
     "ejs": "^2.7.1",
     "express": "~4.16.0",
+    "fs": "0.0.1-security",
     "http-errors": "~1.6.2",
     "jade": "~1.11.0",
     "mongoose": "^5.2.15",

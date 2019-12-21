@@ -6,4 +6,9 @@ router.get('/', function(req, res, next) {
   res.render("home");
 });
 
+// GET User Detail
+router.get('/userProfile', function(req, res, next) {
+  res.render("profile");
+});
+
 module.exports = router;

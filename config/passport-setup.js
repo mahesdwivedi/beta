@@ -33,27 +33,27 @@ passport.use(
       // Callback method triggered upon signing in.
       var calorieIntakeConfig = {
         url: "https://api.fitbit.com/1/user/6PSSYP/activities/date/2019-9-1.json",
-        headers: {'authorization': `Bearer ${accessToken}`},
-    }
-    var userConfig = {
+        headers: { 'authorization': `Bearer ${accessToken}` },
+      }
+      var userConfig = {
         url: "https://api.fitbit.com/1/user/6PSSYP/profile.json",
-        headers: {'authorization': `Bearer ${accessToken}`},
-    }
+        headers: { 'authorization': `Bearer ${accessToken}` },
+      }
 
-    axios.all([
-      axios(calorieIntakeConfig),
-      axios(userConfig)
-  ])
-  .then(axios.spread((calorieIntakeRes, userRes) => {
-      console.log(calorieIntakeRes.data)
-      console.log("--------------------")
-      console.log(userRes.data)
-      var userPorfile = JSON.stringify(userRes.data)
-      fs.writeFile("userProfile.json", userPorfile)
-      var calorieIntake = JSON.stringify(calorieIntakeRes.data)
-      fs.writeFile("calorieIntake.json", calorieIntake)
-  }))
-  .catch(err => console.log(err.data))
+      axios.all([
+        axios(calorieIntakeConfig),
+        axios(userConfig)
+      ])
+        .then(axios.spread((calorieIntakeRes, userRes) => {
+          console.log(calorieIntakeRes.data)
+          console.log("--------------------")
+          console.log(userRes.data)
+          var userPorfile = JSON.stringify(userRes.data)
+          fs.writeFile("userProfile.json", userPorfile)
+          var calorieIntake = JSON.stringify(calorieIntakeRes.data)
+          fs.writeFile("calorieIntake.json", calorieIntake)
+        }))
+        .catch(err => console.log(err.data))
 
       User.findOne({ fitbitId: profile.id }).then(currentUser => {
         if (currentUser) {
@@ -78,5 +78,5 @@ passport.use(
 );
 
 module.exports = {
-  
+
 }
